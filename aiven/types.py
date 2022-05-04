@@ -8,6 +8,9 @@ class Ping:
     url: str
     """URL of the checked page"""
 
+    timestamp: float
+    """When was ping performed, seconds from the epoch"""
+
     response_time: Optional[float]
     """Response time in seconds, None if request timed out"""
 

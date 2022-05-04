@@ -12,17 +12,18 @@ import aiven.types
 
 
 def check_regex(content: str, regex: str) -> bool:
-    '''
+    """
     Check whether content contains regex.
-    '''
+    """
     return re.search(regex, content) is not None
 
 
 def ping_website(url: str, timeout: float, regex: str) -> aiven.types.Ping:
-    '''
+    """
     Pings `url` under `timeout`. If requests is not completed withing timeout return empty Ping,
     else if request passes it creates Ping from information in response.
-    '''
+    """
+    timestamp = time.time()
     try:
         response = requests.get(url, timeout=timeout)
     except requests.exceptions.Timeout:
@@ -30,10 +31,15 @@ def ping_website(url: str, timeout: float, regex: str) -> aiven.types.Ping:
             "Request to %s, timed out after %s s", url, timeout
         )
         return aiven.types.Ping(
-            url=url, response_time=None, status_code=None, content_check=False
+            url=url,
+            timestamp=timestamp,
+            response_time=None,
+            status_code=None,
+            content_check=False,
         )
     return aiven.types.Ping(
         url=url,
+        timestamp=timestamp,
         response_time=response.elapsed.total_seconds(),
         status_code=response.status_code,
         content_check=check_regex(response.text, regex),
@@ -41,9 +47,9 @@ def ping_website(url: str, timeout: float, regex: str) -> aiven.types.Ping:
 
 
 def produce() -> None:
-    '''
+    """
     Run endless loop that calls `ping_website` and send its result to Kafka.
-    '''
+    """
     logger = logging.getLogger("producer")
     logger.info("Start producing")
     producer = kafka.KafkaProducer(
