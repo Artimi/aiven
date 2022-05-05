@@ -63,12 +63,14 @@ def produce() -> None:
     logger.info("Kafka connected")
 
     while True:
+        ping_start_time = time.monotonic()
         ping = ping_website(
             aiven.settings.URL, aiven.settings.CHECK_TIMEOUT, aiven.settings.REGEX
         )
         producer.send(aiven.settings.KAFKA_TOPIC, dataclasses.asdict(ping))
         logger.info("Produced: %s", ping)
-        time.sleep(aiven.settings.CHECK_PERIOD)
+        # sleep for the remaining time to ping every CHECK_PERIOD
+        time.sleep(max(0, ping_start_time + aiven.settings.CHECK_PERIOD - time.monotonic()))
 
 
 if __name__ == "__main__":
