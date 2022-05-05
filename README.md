@@ -89,3 +89,9 @@ Criteria for evaluation
   homework assignment in Github is used by random people (in practice, if you
   want to, you can delete/hide the repository as soon as we have seen it).
 
+
+
+Notes
+=====
+
+- URIs to Kafka and postgres are stored in environment

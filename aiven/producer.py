@@ -66,7 +66,7 @@ def produce() -> None:
         ping = ping_website(
             aiven.settings.URL, aiven.settings.CHECK_TIMEOUT, aiven.settings.REGEX
         )
-        producer.send("pings", dataclasses.asdict(ping))
+        producer.send(aiven.settings.KAFKA_TOPIC, dataclasses.asdict(ping))
         logger.info("Produced: %s", ping)
         time.sleep(aiven.settings.CHECK_PERIOD)
 
