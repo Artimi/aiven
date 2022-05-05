@@ -1,6 +1,8 @@
 Aiven homework
 ==============
 
+> **_NOTE:_**  This is the original assignment, scroll to the bottom to see developer notes.
+
 This is a coding assignment for a backend developer position at Aiven.
 
 The exercise should be relatively fast to complete. You can spend as much time
@@ -91,7 +93,32 @@ Criteria for evaluation
 
 
 
-Notes
-=====
+Quick start
+===========
 
-- URIs to Kafka and postgres are stored in environment
+- To start make sure that you have the following variables in your environment:
+```
+KAFKA_URI
+POSTGRES_URI
+```
+- To connect to Kafka you will need ssl certificate files (see
+[Aiven Kafka example](https://help.aiven.io/en/articles/5343895-python-examples-for-testing-aiven-for-apache-kafka)):
+```
+ca.pem
+service.cert
+service.key
+```
+- To start producer run:
+```sh
+$ PYTHONPATH=. python aiven/producer.py
+```
+
+- To initialize database run
+```sh
+$ yoyo apply --database $POSTGRES_URI aiven/migrations
+```
+
+- To start consumer run:
+```sh
+$ PYTHONPATH=. python aiven/consumer.py
+```
