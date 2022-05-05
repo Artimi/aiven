@@ -1,3 +1,4 @@
+from typing import Any
 import dataclasses
 import json
 import logging
@@ -9,6 +10,7 @@ import requests
 
 import aiven.settings
 import aiven.types
+import aiven.utils
 
 
 def check_regex(content: str, regex: str) -> bool:
@@ -46,14 +48,14 @@ def ping_website(url: str, timeout: float, regex: str) -> aiven.types.Ping:
     )
 
 
-def produce() -> None:
+def produce(settings: dict[str, Any]) -> None:
     """
     Run endless loop that calls `ping_website` and send its result to Kafka.
     """
     logger = logging.getLogger("producer")
     logger.info("Start producing")
     producer = kafka.KafkaProducer(
-        bootstrap_servers=aiven.settings.KAFKA_URI,
+        bootstrap_servers=settings["KAFKA_URI"],
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         security_protocol="SSL",
         ssl_cafile="ca.pem",
@@ -65,12 +67,14 @@ def produce() -> None:
     while True:
         ping_start_time = time.monotonic()
         ping = ping_website(
-            aiven.settings.URL, aiven.settings.CHECK_TIMEOUT, aiven.settings.REGEX
+            settings["URL"], settings["CHECK_TIMEOUT"], settings["REGEX"]
         )
-        producer.send(aiven.settings.KAFKA_TOPIC, dataclasses.asdict(ping))
+        producer.send(settings["KAFKA_TOPIC"], dataclasses.asdict(ping))
         logger.info("Produced: %s", ping)
         # sleep for the remaining time to ping every CHECK_PERIOD
-        time.sleep(max(0, ping_start_time + aiven.settings.CHECK_PERIOD - time.monotonic()))
+        time.sleep(
+            max(0, ping_start_time + settings["CHECK_PERIOD"] - time.monotonic())
+        )
 
 
 if __name__ == "__main__":
@@ -78,4 +82,4 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s"
     )
     logging.getLogger("kafka.conn").setLevel(logging.WARNING)
-    produce()
+    produce(aiven.utils.module_to_dict(aiven.settings))
