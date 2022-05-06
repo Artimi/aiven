@@ -108,6 +108,11 @@ ca.pem
 service.cert
 service.key
 ```
+- Install dependencies
+```sh
+$ poetry install
+```
+
 - To start producer run:
 ```sh
 $ PYTHONPATH=. python aiven/producer.py
@@ -122,3 +127,25 @@ $ yoyo apply --database $POSTGRES_URI aiven/migrations
 ```sh
 $ PYTHONPATH=. python aiven/consumer.py
 ```
+
+- To run integration test run
+```sh
+$ pytest aiven/tests/itest_end_to_end.py
+```
+
+Notes
+=====
+- I used synchronous Python since it is easier for this task, but I would
+  rather use asyncio if e.g. producer should scan multiple URLs.
+- Producer checks the url. If website does not respond in preselected
+  timeout, "empty" Ping is produced. It tries to check website every
+  `CHECK_PERIOD`.
+- Consumer is connected to a Kafka using `group_id` so even if it is
+  restarted, no message will be missing.
+- Database is a single table which should be enough for long time.
+  For bigger volumes I would rather use TimescaleDB for better handling
+  of time series.
+- I did not prepare a Dockerfile since the assignment discouraged from it.
+- I prepared simple unittests and one end-to-end test. End-to-end test needs
+  to be running in an environment with  URIs and certificate files which is
+  the reason why it is not in CI. I could add the environment there using secrets.
